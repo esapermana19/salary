@@ -1,22 +1,93 @@
-export default function SignInPage() {
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export default function SignIn() {
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Login gagal");
+      }
+
+      localStorage.setItem("access_token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      router.push("/dashboard");
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <main className="flex min-h-screen items-center justify-center bg-gray-100">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-xl">
-        <h1 className="flex justify-center text-2xl font-bold mt-4">Sign in</h1>
-        <form className="flex flex-col gap-6 p-6">
-          <label className="flex flex-col gap-2">
-            Email
-            <input type="email" className="rounded-md border border-gray-500 px-4" />
-          </label>
-          <label className="flex flex-col gap-2">
-            Password
-            <input type="password" className="rounded-md border border-gray-500 px-4" />
-          </label>
-          <button className="rounded-lg bg-black px-4 py-2 text-white">
-            Sign in
+    <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-black">
+      <main className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md dark:bg-zinc-900">
+        <h1 className="mb-6 text-center text-2xl font-semibold">Sign In</h1>
+
+        <form onSubmit={handleLogin} className="space-y-4">
+          <input
+            type="email"
+            placeholder="admin@mail.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full rounded-lg border px-3 py-2"
+            required
+          />
+
+          <input
+            type="password"
+            placeholder="******"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full rounded-lg border px-3 py-2"
+            required
+          />
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
+
+          <button
+            disabled={loading}
+            className="w-full rounded-lg bg-black py-2 text-white disabled:opacity-50"
+          >
+            {loading ? "Logging in..." : "Login"}
           </button>
+          <p className="text-center text-sm text-gray-600 mt-2">
+            don't have an account?{" "}
+            <button
+              type="button"
+              onClick={() => router.push("/sign-up")}
+              className="text-black font-bold hover:underline"
+            >
+              Sign Up
+            </button>
+          </p>
         </form>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
