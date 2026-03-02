@@ -44,27 +44,27 @@ export default function Navigation() {
       subMenu: [
         {
           name: "Divisi",
-          href: "/dashboard/divisi",
+          href: "/divisi",
           icon: <Building2 size={18} />,
         },
         {
           name: "Jabatan",
-          href: "/dashboard/jabatan",
+          href: "/jabatan",
           icon: <Briefcase size={18} />,
         },
         {
           name: "Karyawan",
-          href: "/dashboard/karyawan",
+          href: "/karyawan",
           icon: <Users size={18} />,
         },
         {
           name: "User",
-          href: "/dashboard/user",
+          href: "/user",
           icon: <UserSquare2 size={18} />,
         },
         {
           name: "Konfigurasi",
-          href: "/dashboard/konfigurasi",
+          href: "/konfigurasi",
           icon: <Settings size={18} />,
         },
       ],

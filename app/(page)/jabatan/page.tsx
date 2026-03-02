@@ -6,13 +6,14 @@ import { Plus, Trash2, Edit, List, Save, X, Briefcase } from "lucide-react";
 export default function JabatanPage() {
   const [showForm, setShowForm] = useState(false);
   const [namaJabatan, setNamaJabatan] = useState("");
+  const [Divisi, setDivisi] = useState("");
   const [gajiPokok, setGajiPokok] = useState("");
 
   // Data dummy untuk Jabatan
   const [dataJabatan, setDataJabatan] = useState([
-    { id: 1, nama: "Manager", gaji: "10.000.000" },
-    { id: 2, nama: "Staff Administrasi", gaji: "5.000.000" },
-    { id: 3, nama: "Software Engineer", gaji: "8.500.000" },
+    { id: 1, nama: "Manager", divisi: "Teknologi Informasi", gaji: "10.000.000" },
+    { id: 2, nama: "Staff Administrasi", divisi: "Keuangan", gaji: "5.000.000" },
+    { id: 3, nama: "Software Engineer", divisi: "Sumber Daya Manusia", gaji: "8.500.000" },
   ]);
 
   const handleTambahData = (e: React.FormEvent) => {
@@ -22,6 +23,7 @@ export default function JabatanPage() {
     const newData = {
       id: dataJabatan.length + 1,
       nama: namaJabatan,
+      divisi: Divisi,
       gaji: gajiPokok,
     };
 
@@ -62,15 +64,23 @@ export default function JabatanPage() {
             <form onSubmit={handleTambahData} className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <input
                 type="text"
-                placeholder="Nama Jabatan (ex: Senior Developer)"
+                placeholder="Nama Jabatan"
                 value={namaJabatan}
                 onChange={(e) => setNamaJabatan(e.target.value)}
                 className="rounded-xl border border-gray-300 px-4 py-2 outline-none focus:border-teal-500 transition-all"
                 required
               />
               <input
+                type="text"
+                placeholder="Nama Divisi"
+                value={Divisi}
+                onChange={(e) => setDivisi(e.target.value)}
+                className="rounded-xl border border-gray-300 px-4 py-2 outline-none focus:border-teal-500 transition-all"
+                required
+              />
+              <input
                 type="number"
-                placeholder="Gaji Pokok (Nominal)"
+                placeholder="Gaji Pokok"
                 value={gajiPokok}
                 onChange={(e) => setGajiPokok(e.target.value)}
                 className="rounded-xl border border-gray-300 px-4 py-2 outline-none focus:border-teal-500 transition-all"
@@ -94,11 +104,12 @@ export default function JabatanPage() {
           </div>
           <table className="w-full text-left">
             <thead>
-              <tr className="text-gray-400 text-sm uppercase tracking-wider border-b border-gray-100">
-                <th className="px-6 py-4 font-medium">No</th>
-                <th className="px-6 py-4 font-medium">Nama Jabatan</th>
-                <th className="px-6 py-4 font-medium">Gaji Pokok</th>
-                <th className="px-6 py-4 font-medium text-right">Aksi</th>
+              <tr className="text-gray-400 text-sm uppercase tracking-wider border-b border-gray-100 font-bold">
+                <th className="px-6 py-4">No</th>
+                <th className="px-6 py-4">Nama Jabatan</th>
+                <th className="px-6 py-4">Divisi</th>
+                <th className="px-6 py-4">Gaji Pokok</th>
+                <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -106,6 +117,7 @@ export default function JabatanPage() {
                 <tr key={item.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4">{index + 1}</td>
                   <td className="px-6 py-4 font-semibold text-slate-700">{item.nama}</td>
+                  <td className="px-6 py-4 font-semibold text-slate-700">{item.divisi}</td>
                   <td className="px-6 py-4">Rp {item.gaji}</td>
                   <td className="px-6 py-4">
                     <div className="flex justify-end gap-2">

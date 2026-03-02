@@ -83,10 +83,10 @@ export default function DivisiPage() {
           </div>
           <table className="w-full text-left">
             <thead>
-              <tr className="text-gray-400 text-sm uppercase tracking-wider">
-                <th className="px-6 py-4 font-medium">No</th>
-                <th className="px-6 py-4 font-medium">Nama Divisi</th>
-                <th className="px-6 py-4 font-medium text-right">Aksi</th>
+              <tr className="text-gray-400 text-sm uppercase tracking-wider font-bold">
+                <th className="px-6 py-4">No</th>
+                <th className="px-6 py-4">Nama Divisi</th>
+                <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 text-gray-700">
