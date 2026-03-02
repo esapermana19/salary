@@ -27,7 +27,7 @@ export default function Navbar({ onMenuClick, userName = 'Admin' }: NavbarProps)
         {/* Mobile Menu Button */}
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 rounded-lg hover:bg-slate-800 text-purple-300 transition-colors"
+          className="lg:hidden p-2 rounded-lg hover:bg-slate-800 text-teal-300 transition-colors"
         >
           <Menu className="w-6 h-6" />
         </button>
@@ -51,7 +51,7 @@ export default function Navbar({ onMenuClick, userName = 'Admin' }: NavbarProps)
         <div className="relative">
           <button
             onClick={() => setShowNotification(!showNotification)}
-            className="relative p-2 rounded-lg hover:bg-slate-800 text-slate-700 transition-colors"
+            className="relative p-2 rounded-lg hover:bg-teal-400 text-slate-700 transition-colors"
           >
             <Bell className="w-5 h-5" />
             <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
@@ -59,14 +59,14 @@ export default function Navbar({ onMenuClick, userName = 'Admin' }: NavbarProps)
 
           {/* Notification Dropdown */}
           {showNotification && (
-            <div className="absolute right-0 mt-2 w-80 bg-slate-800 border border-purple-900/50 rounded-lg shadow-xl z-50">
-              <div className="p-4 border-b border-purple-900/50">
+            <div className="absolute right-0 mt-2 w-80 bg-slate-800 border border-teal-900/50 rounded-lg shadow-xl z-50">
+              <div className="p-4 border-b border-teal-900/50">
                 <h3 className="font-semibold text-white">Notifikasi</h3>
               </div>
               <div className="max-h-96 overflow-y-auto">
-                <div className="p-4 hover:bg-purple-900/20 cursor-pointer border-b border-purple-900/30">
-                  <p className="text-sm text-purple-200">Presensi berhasil disimpan</p>
-                  <p className="text-xs text-purple-400 mt-1">5 menit yang lalu</p>
+                <div className="p-4 hover:bg-teal-900/20 cursor-pointer border-b border-teal-900/30">
+                  <p className="text-sm text-teal-200">Presensi berhasil disimpan</p>
+                  <p className="text-xs text-teal-400 mt-1">5 menit yang lalu</p>
                 </div>
               </div>
             </div>
@@ -74,7 +74,7 @@ export default function Navbar({ onMenuClick, userName = 'Admin' }: NavbarProps)
         </div>
 
         {/* Settings */}
-        <button className="hidden sm:flex p-2 rounded-lg hover:bg-slate-800 text-slate-700 transition-colors">
+        <button className="hidden sm:flex p-2 rounded-lg hover:bg-teal-400 text-slate-700 transition-colors">
           <Settings className="w-5 h-5" />
         </button>
 
@@ -82,36 +82,36 @@ export default function Navbar({ onMenuClick, userName = 'Admin' }: NavbarProps)
         <div className="relative">
           <button
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-800 transition-colors"
+            className="flex items-center gap-3 p-2 rounded-lg hover:bg-teal-400 transition-colors"
           >
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-purple-700 rounded-full flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-700 rounded-full flex items-center justify-center">
               <User className="w-4 h-4 text-white" />
             </div>
             <div className="hidden md:block text-left">
               <p className="text-sm font-medium text-black">{userName}</p>
               <p className="text-xs text-black">Administrator</p>
             </div>
-            <ChevronDown className="w-4 h-4 text-purple-400 hidden md:block" />
+            <ChevronDown className="w-4 h-4 text-slate-400 hidden md:block" />
           </button>
 
           {/* Profile Dropdown */}
           {showProfileMenu && (
-            <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-purple-900/50 rounded-lg shadow-xl z-50 overflow-hidden">
-              <div className="p-4 border-b border-purple-900/50">
+            <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-teal-900/50 rounded-lg shadow-xl z-50 overflow-hidden">
+              <div className="p-4 border-b border-teal-900/50">
                 <p className="font-medium text-white">{userName}</p>
-                <p className="text-sm text-purple-400">admin@salaryapp.com</p>
+                <p className="text-sm text-teal-400">admin@salaryapp.com</p>
               </div>
               <div className="py-2">
-                <a href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-purple-200 hover:bg-purple-900/30 transition-colors">
+                <a href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-teal-200 hover:bg-teal-900/30 transition-colors">
                   <User className="w-4 h-4" />
                   Profil Saya
                 </a>
-                <a href="/settings" className="flex items-center gap-2 px-4 py-2 text-sm text-purple-200 hover:bg-purple-900/30 transition-colors">
+                <a href="/settings" className="flex items-center gap-2 px-4 py-2 text-sm text-teal-200 hover:bg-teal-900/30 transition-colors">
                   <Settings className="w-4 h-4" />
                   Pengaturan
                 </a>
               </div>
-              <div className="border-t border-purple-900/50 py-2">
+              <div className="border-t border-teal-900/50 py-2">
                 <button
                   onClick={() => {
                     localStorage.removeItem('access_token');
