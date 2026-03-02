@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutGrid,
   Database,
@@ -18,10 +18,20 @@ import {
   ChevronUp,
   LogOut,
 } from "lucide-react";
+import { error } from "console";
 
 export default function Navigation() {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>("Master");
+  const [user, setUser] = useState<{ nama: string; email: string } | null>(
+    null,
+  );
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+    }
+  },[]);
 
   const toggleMenu = (menuName: string) => {
     setOpenMenu(openMenu === menuName ? null : menuName);
@@ -179,10 +189,16 @@ export default function Navigation() {
             <span className="font-semibold">AD</span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium">Admin</p>
-            <p className="text-xs text-slate-400">admin@salaryapp.com</p>
+            {/* Gunakan operator Optional Chaining (?.) untuk jaga-jaga jika data belum dimuat */}
+            <p className="text-sm font-medium">{user?.nama || "Admin"}</p>
+            <p className="text-xs text-slate-400">
+              {user?.email || "admin@salaryapp.com"}
+            </p>
           </div>
-          <button onClick={handleLogout} className="text-slate-400 hover:text-white">
+          <button
+            onClick={handleLogout}
+            className="text-slate-400 hover:text-white"
+          >
             <LogOut size={18} />
           </button>
         </div>

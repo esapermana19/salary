@@ -45,7 +45,7 @@ export default function KonfigurasiPage() {
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Konfigurasi Sistem</h1>
-          <p className="text-gray-500 text-sm">Atur parameter jatah cuti dan potongan gaji tahunan</p>
+          <p className="text-gray-500 text-sm">Atur parameter jatah cuti tahunan</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
@@ -78,7 +78,7 @@ export default function KonfigurasiPage() {
               </div>
 
               <div className="flex flex-col gap-1">
-                <label className="text-sm font-semibold text-gray-600 ml-1">Potongan Gaji (Rp)</label>
+                <label className="text-sm font-semibold text-gray-600 ml-1">Nilai Uang Per Cuti (Rp)</label>
                 <input name="nilaiUang" type="number" placeholder="Potongan per hari" value={formData.nilaiUang} onChange={handleInputChange} className="rounded-xl border border-gray-300 px-4 py-2 outline-none focus:border-teal-500 transition-all" required />
               </div>
 
@@ -110,7 +110,7 @@ export default function KonfigurasiPage() {
                 <th className="px-6 py-4 text-center w-16">No</th>
                 <th className="px-6 py-4">Tahun</th>
                 <th className="px-6 py-4">Jatah Cuti</th>
-                <th className="px-6 py-4">Nilai Potongan</th>
+                <th className="px-6 py-4">Nilai Uang</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
