@@ -17,15 +17,17 @@ import {
   ChevronDown,
   ChevronUp,
   LogOut,
+  FileText,
+  TimerIcon,
+  ChartBar,
+  History,
 } from "lucide-react";
 import { error } from "console";
 
 export default function Navigation() {
   const pathname = usePathname();
   const [openMenu, setOpenMenu] = useState<string | null>("Master");
-  const [user, setUser] = useState<{ nama: string; email: string } | null>(
-    null,
-  );
+  const [user, setUser] = useState<{ name: string; email: string; role:string } | null>(null,);
   useEffect(() => {
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
@@ -81,18 +83,35 @@ export default function Navigation() {
     },
     {
       name: "Presensi",
-      href: "/dashboard/presensi",
+      href: "#",
       icon: <CalendarCheck size={20} />,
+      subMenu: user?.role === "admin"
+      ? [{ name: "Report Presensi", href: "/presensi/report-presensi", icon: <FileText size={18} /> }]
+      : [                                                                                            
+          { name: "Kehadiran", href: "/presensi/kehadiran", icon: <CalendarCheck size={18} /> },
+        ]
     },
     {
       name: "Cuti",
-      href: "/dashboard/cuti",
+      href: "#",
       icon: <CalendarDays size={20} />,
+      subMenu: user?.role === "admin"
+      ? [{ name: "Report Cuti", href: "/cuti/report-cuti", icon: <FileText size={18} /> }]
+      : [                                                                                            
+          { name: "Form Pengajuan", href: "/cuti/pengajuan-cuti", icon: <CalendarDays size={18} /> },
+          { name: "Riwayat & Saldo Cuti", href: "/cuti/riwayat-cuti", icon: <History size={18} /> }
+        ]
     },
     {
       name: "Gaji",
-      href: "/dashboard/gaji",
+      href: "#",
       icon: <Wallet size={20} />,
+      subMenu: user?.role === "admin"
+      ? [
+          { name: "Proses Gaji", href: "/gaji/proses-gaji", icon: <TimerIcon size={18} /> },
+          { name: "Report Gaji", href: "/gaji/report-gaji", icon: <FileText size={18} /> }
+        ]
+        :[{name: "Slip Gaji", href: "/gaji/slip-gaji", icon: <Wallet size={18}/>}]
     },
   ];
 
@@ -120,7 +139,11 @@ export default function Navigation() {
 
       {/* Menu Items */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-        {menuItems.map((item) => (
+      {menuItems.map((item) => {
+        if(item.name === "Master" && user?.role !=="admin") {
+          return null;
+        }
+        return (
           <div key={item.name}>
             {item.subMenu ? (
               <>
@@ -179,7 +202,9 @@ export default function Navigation() {
               </Link>
             )}
           </div>
-        ))}
+        )
+      }   
+        )}
       </nav>
 
       {/* User Profile */}
@@ -190,9 +215,9 @@ export default function Navigation() {
           </div>
           <div className="flex-1">
             {/* Gunakan operator Optional Chaining (?.) untuk jaga-jaga jika data belum dimuat */}
-            <p className="text-sm font-medium">{user?.nama || "Admin"}</p>
+            <p className="text-sm font-medium">{user?.name || user?.role}</p>
             <p className="text-xs text-slate-400">
-              {user?.email || "admin@salaryapp.com"}
+              {user?.email || user?.role}
             </p>
           </div>
           <button

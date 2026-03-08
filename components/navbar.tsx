@@ -9,16 +9,22 @@ import {
   Settings,
   ChevronDown
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface NavbarProps {
   onMenuClick?: () => void;
-  userName?: string;
 }
 
-export default function Navbar({ onMenuClick, userName = 'Admin' }: NavbarProps) {
+export default function Navbar({ onMenuClick}: NavbarProps) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
+  const [user, setUser] = useState<{ name: string; email: string; role:string } | null>(null);
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+        setUser(JSON.parse(storedUser));
+    }
+  },[]);
 
   return (
     <nav className="h-16 bg-white  flex items-center justify-between px-10 shadow-lg">
@@ -88,8 +94,8 @@ export default function Navbar({ onMenuClick, userName = 'Admin' }: NavbarProps)
               <User className="w-4 h-4 text-white" />
             </div>
             <div className="hidden md:block text-left">
-              <p className="text-sm font-medium text-black">{userName}</p>
-              <p className="text-xs text-black">Administrator</p>
+              <p className="text-sm font-medium text-black">{user?.name}</p>
+              <p className="text-xs text-black">{user?.role}</p>
             </div>
             <ChevronDown className="w-4 h-4 text-slate-400 hidden md:block" />
           </button>
@@ -98,8 +104,8 @@ export default function Navbar({ onMenuClick, userName = 'Admin' }: NavbarProps)
           {showProfileMenu && (
             <div className="absolute right-0 mt-2 w-56 bg-slate-800 border border-teal-900/50 rounded-lg shadow-xl z-50 overflow-hidden">
               <div className="p-4 border-b border-teal-900/50">
-                <p className="font-medium text-white">{userName}</p>
-                <p className="text-sm text-teal-400">admin@salaryapp.com</p>
+                <p className="font-medium text-white">{user?.name}</p>
+                <p className="text-sm text-teal-400">{user?.email}</p>
               </div>
               <div className="py-2">
                 <a href="/profile" className="flex items-center gap-2 px-4 py-2 text-sm text-teal-200 hover:bg-teal-900/30 transition-colors">

@@ -9,7 +9,6 @@ export default function JabatanPage() {
   const [Divisi, setDivisi] = useState("");
   const [gajiPokok, setGajiPokok] = useState("");
 
-  // Data dummy untuk Jabatan
   const [dataJabatan, setDataJabatan] = useState([
     { id: 1, nama: "Manager", divisi: "Teknologi Informasi", gaji: "10.000.000" },
     { id: 2, nama: "Staff Administrasi", divisi: "Keuangan", gaji: "5.000.000" },
@@ -24,30 +23,30 @@ export default function JabatanPage() {
       id: dataJabatan.length + 1,
       nama: namaJabatan,
       divisi: Divisi,
-      gaji: gajiPokok,
+      gaji: parseInt(gajiPokok).toLocaleString("id-ID"),
     };
 
     setDataJabatan([...dataJabatan, newData]);
     setNamaJabatan("");
+    setDivisi("");
     setGajiPokok("");
     setShowForm(false);
-    alert("Jabatan baru berhasil ditambahkan!");
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-2">
       {/* Header Halaman */}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Data Jabatan</h1>
-          <p className="text-gray-500 text-sm">Kelola tingkatan posisi dan standar gaji pokok</p>
+          <h1 className="text-xl font-bold text-slate-800 tracking-tight">Data Jabatan</h1>
+          <p className="text-slate-500 font-medium text-xs mt-1">Kelola tingkatan posisi dan standar gaji pokok</p>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-all ${
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all duration-200 text-sm ${
             showForm 
-              ? "bg-gray-100 text-gray-600 hover:bg-gray-200" 
-              : "bg-teal-500 text-white hover:bg-teal-600 shadow-lg shadow-teal-500/30"
+              ? "bg-slate-100 text-slate-600 hover:bg-slate-200" 
+              : "bg-teal-500 text-white hover:bg-teal-600 shadow-md shadow-teal-500/20 active:scale-95"
           }`}
         >
           {showForm ? <><X size={18} /> Batal</> : <><Plus size={18} /> Tambah Jabatan</>}
@@ -57,82 +56,112 @@ export default function JabatanPage() {
       <div className="grid grid-cols-1 gap-6">
         {/* FORM TAMBAH JABATAN */}
         {showForm && (
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-teal-200 animate-in fade-in slide-in-from-top-4 duration-300">
-            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <Briefcase className="text-teal-500" size={20} /> Tambah Jabatan Baru
-            </h2>
-            <form onSubmit={handleTambahData} className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <input
-                type="text"
-                placeholder="Nama Jabatan"
-                value={namaJabatan}
-                onChange={(e) => setNamaJabatan(e.target.value)}
-                className="rounded-xl border border-gray-300 px-4 py-2 outline-none focus:border-teal-500 transition-all"
-                required
-              />
-              <input
-                type="text"
-                placeholder="Nama Divisi"
-                value={Divisi}
-                onChange={(e) => setDivisi(e.target.value)}
-                className="rounded-xl border border-gray-300 px-4 py-2 outline-none focus:border-teal-500 transition-all"
-                required
-              />
-              <input
-                type="number"
-                placeholder="Gaji Pokok"
-                value={gajiPokok}
-                onChange={(e) => setGajiPokok(e.target.value)}
-                className="rounded-xl border border-gray-300 px-4 py-2 outline-none focus:border-teal-500 transition-all"
-                required
-              />
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-300 text-slate-800">
+            <div className="flex items-center gap-2 mb-5">
+              <Briefcase size={20} className="text-teal-500" />
+              <h2 className="text-md font-bold">Tambah Jabatan Baru</h2>
+            </div>
+            
+            <form onSubmit={handleTambahData} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+              <div className="group">
+                <label className="text-[11px] font-bold text-slate-500 ml-1 mb-1.5 block group-hover:text-teal-600 transition-colors uppercase tracking-wider">
+                  Nama Jabatan
+                </label>
+                <input
+                  type="text"
+                  placeholder="Manager"
+                  value={namaJabatan}
+                  onChange={(e) => setNamaJabatan(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium bg-slate-50/50 focus:bg-white"
+                  required
+                />
+              </div>
+
+              <div className="group">
+                <label className="text-[11px] font-bold text-slate-500 ml-1 mb-1.5 block group-hover:text-teal-600 transition-colors uppercase tracking-wider">
+                  Divisi
+                </label>
+                <input
+                  type="text"
+                  placeholder="Teknologi Informasi"
+                  value={Divisi}
+                  onChange={(e) => setDivisi(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium bg-slate-50/50 focus:bg-white"
+                  required
+                />
+              </div>
+
+              <div className="group">
+                <label className="text-[11px] font-bold text-slate-500 ml-1 mb-1.5 block group-hover:text-teal-600 transition-colors uppercase tracking-wider">
+                  Gaji Pokok
+                </label>
+                <input
+                  type="number"
+                  placeholder="8500000"
+                  value={gajiPokok}
+                  onChange={(e) => setGajiPokok(e.target.value)}
+                  className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium bg-slate-50/50 focus:bg-white"
+                  required
+                />
+              </div>
+
               <button
                 type="submit"
-                className="bg-slate-800 text-white px-6 py-2 rounded-xl font-bold hover:bg-slate-700 flex items-center justify-center gap-2"
+                className="bg-slate-800 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-teal-600 active:bg-teal-700 transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
               >
-                <Save size={18} /> Simpan Jabatan
+                <Save size={18} /> Simpan
               </button>
             </form>
           </div>
         )}
 
         {/* VIEW DATA JABATAN */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden text-gray-800">
-          <div className="p-4 border-b border-gray-100 bg-gray-50/50 flex items-center gap-2">
-            <List size={18} className="text-gray-400" />
-            <span className="text-sm font-semibold text-gray-600">Daftar Posisi & Gaji</span>
+        <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-1 h-4 bg-teal-500 rounded-full"></div>
+              <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">Daftar Posisi & Gaji</span>
+            </div>
           </div>
-          <table className="w-full text-left">
-            <thead>
-              <tr className="text-gray-400 text-sm uppercase tracking-wider border-b border-gray-100 font-bold">
-                <th className="px-6 py-4">No</th>
-                <th className="px-6 py-4">Nama Jabatan</th>
-                <th className="px-6 py-4">Divisi</th>
-                <th className="px-6 py-4">Gaji Pokok</th>
-                <th className="px-6 py-4 text-right">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {dataJabatan.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4">{index + 1}</td>
-                  <td className="px-6 py-4 font-semibold text-slate-700">{item.nama}</td>
-                  <td className="px-6 py-4 font-semibold text-slate-700">{item.divisi}</td>
-                  <td className="px-6 py-4">Rp {item.gaji}</td>
-                  <td className="px-6 py-4">
-                    <div className="flex justify-end gap-2">
-                      <button className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors">
-                        <Edit size={18} />
-                      </button>
-                      <button className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  </td>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="text-slate-400 text-[10px] uppercase tracking-wider font-bold bg-slate-50/30">
+                  <th className="px-6 py-4">No</th>
+                  <th className="px-6 py-4">Nama Jabatan</th>
+                  <th className="px-6 py-4">Divisi</th>
+                  <th className="px-6 py-4">Gaji Pokok</th>
+                  <th className="px-6 py-4 text-right">Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-slate-700 text-sm font-medium">
+                {dataJabatan.map((item, index) => (
+                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors group">
+                    <td className="px-6 py-4 text-slate-400 font-medium">{index + 1}</td>
+                    <td className="px-6 py-4">
+                      <span className="font-semibold group-hover:text-teal-600 transition-colors">{item.nama}</span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-500">{item.divisi}</td>
+                    <td className="px-6 py-4 font-bold text-slate-800">
+                      <span className="text-teal-600 mr-1 text-xs">Rp</span>
+                      {item.gaji}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-1">
+                        <button className="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-all">
+                          <Edit size={16} />
+                        </button>
+                        <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all">
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
