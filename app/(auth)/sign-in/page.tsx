@@ -65,7 +65,7 @@ export default function SignIn() {
             </label>
             <input
               type="email"
-              placeholder="admin@mail.com"
+              placeholder="hrd@mail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               // Focus ring teal-500 sesuai permintaan
