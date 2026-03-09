@@ -29,10 +29,10 @@ export default function SignIn() {
       if (!res.ok) {
         throw new Error(data.message || "Login gagal");
       }
-      
+
       const userWithRole = {
-          ...data.user,
-          role: email === "hrd@mail.com" ? "admin" : "karyawan"
+        ...data.user,
+        role: email === "hrd@mail.com" ? "admin" : "karyawan",
       };
 
       localStorage.setItem("access_token", data.token);
@@ -49,11 +49,20 @@ export default function SignIn() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-slate-900">
       <main className="w-full max-w-md rounded-2xl bg-white p-8 shadow-md dark:bg-zinc-900 border border-slate-100">
-        <h1 className="mb-6 text-center text-2xl font-bold text-slate-800 dark:text-white">Sign In</h1>
+        <h1 className="mb-6 text-center text-2xl font-bold text-slate-800 dark:text-white">
+          Sign In
+        </h1>
+        <p className="text-center text-sm text-slate-500 mb-6">
+          login sebagai admin: <br />
+          <span className="font-bold">hrd@mail.com</span><br />
+          <span className="font-bold">hrd123</span>
+        </p>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 ml-1">Email Address</label>
+            <label className="text-xs font-bold text-slate-500 ml-1">
+              Email Address
+            </label>
             <input
               type="email"
               placeholder="admin@mail.com"
@@ -66,7 +75,9 @@ export default function SignIn() {
           </div>
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-500 ml-1">Password</label>
+            <label className="text-xs font-bold text-slate-500 ml-1">
+              Password
+            </label>
             <input
               type="password"
               placeholder="******"
@@ -78,7 +89,9 @@ export default function SignIn() {
             />
           </div>
 
-          {error && <p className="text-xs font-bold text-red-500 ml-1">{error}</p>}
+          {error && (
+            <p className="text-xs font-bold text-red-500 ml-1">{error}</p>
+          )}
 
           <button
             disabled={loading}
@@ -87,7 +100,7 @@ export default function SignIn() {
           >
             {loading ? "Logging in..." : "Login"}
           </button>
-          
+
           <p className="text-center text-sm text-slate-500 mt-4">
             don't have an account?{" "}
             <button
