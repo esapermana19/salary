@@ -37,18 +37,6 @@ export default function Navbar({ onMenuClick}: NavbarProps) {
         >
           <Menu className="w-6 h-6" />
         </button>
-
-        {/* Search Bar */}
-        <div className="hidden md:flex items-center flex-1 max-w-md">
-          <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-black" />
-            <input
-              type="text"
-              placeholder="Cari sesuatu..."
-              className="w-full pl-10 pr-4 py-2 bg-white border border-black rounded-lg text-gray-500 placeholder-gray-400 focus:outline-none focus:border-slate-800 focus:ring-1 focus:ring-slate-800 transition-all"
-            />
-          </div>
-        </div>
       </div>
 
       {/* Right Section - Notifications & Profile */}

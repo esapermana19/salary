@@ -1,48 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+
+interface User {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+}
+
 import { Plus, Trash2, Edit, Save, X, UserPlus, ShieldCheck, Search, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function UserPage() {
   const [showForm, setShowForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [userList, setUserList] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
   const itemsPerPage = 5; // Sesuai permintaan sebelumnya, diatur 5 baris
 
-  const [formData, setFormData] = useState({
-    nama: "",
-    email: "",
-    password: "",
-    role: ""
-  });
+  // Form states
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("user");
 
-  // Data Dummy 20 User (Pemain & Staff Barcelona)
-  const [dataUser, setDataUser] = useState([
-    { id: 1, nama: "Hansi Flick", email: "flick@fcb.com", role: "admin" },
-    { id: 2, nama: "Lamine Yamal", email: "lamine@fcb.com", role: "karyawan" },
-    { id: 3, nama: "Robert Lewandowski", email: "lewy@fcb.com", role: "karyawan" },
-    { id: 4, nama: "Raphinha Belloli", email: "rapha@fcb.com", role: "admin" },
-    { id: 5, nama: "Pedri Gonzalez", email: "pedri@fcb.com", role: "karyawan" },
-    { id: 6, nama: "Gavi Paez", email: "gavi@fcb.com", role: "karyawan" },
-    { id: 7, nama: "Frenkie de Jong", email: "frenkie@fcb.com", role: "karyawan" },
-    { id: 8, nama: "Ronald Araujo", email: "araujo@fcb.com", role: "admin" },
-    { id: 9, nama: "Jules Kounde", email: "kounde@fcb.com", role: "karyawan" },
-    { id: 10, nama: "Marc-Andre ter Stegen", email: "stegen@fcb.com", role: "admin" },
-    { id: 11, nama: "Dani Olmo", email: "olmo@fcb.com", role: "karyawan" },
-    { id: 12, nama: "Pau Cubarsi", email: "cubarsi@fcb.com", role: "karyawan" },
-    { id: 13, nama: "Fermin Lopez", email: "fermin@fcb.com", role: "karyawan" },
-    { id: 14, nama: "Alejandro Balde", email: "balde@fcb.com", role: "karyawan" },
-    { id: 15, nama: "Inigo Martinez", email: "martinez@fcb.com", role: "karyawan" },
-    { id: 16, nama: "Ferran Torres", email: "ferran@fcb.com", role: "karyawan" },
-    { id: 17, nama: "Andreas Christensen", email: "andreas@fcb.com", role: "karyawan" },
-    { id: 18, nama: "Marc Casado", email: "casado@fcb.com", role: "karyawan" },
-    { id: 19, nama: "Ansu Fati", email: "ansufati@fcb.com", role: "karyawan" },
-    { id: 20, nama: "Deco Souza", email: "deco@fcb.com", role: "admin" },
-  ]);
 
   // Logic Filtering
-  const filteredUser = dataUser.filter((user) =>
-    user.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filteredUser = userList.filter((user) =>
+    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.role.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -53,24 +41,89 @@ export default function UserPage() {
   const currentItems = filteredUser.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(filteredUser.length / itemsPerPage);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+const token = typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
+const fetchUser = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("https://payroll.politekniklp3i-tasikmalaya.ac.id/api/master-user", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal mengambil data user");
+      setUserList(data.data || data);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleTambahData = (e: React.FormEvent) => {
+  useEffect(() => {
+    if (token) {
+      fetchUser();
+    }
+  }, [token]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newData = {
-      id: dataUser.length + 1,
-      nama: formData.nama,
-      email: formData.email,
-      role: formData.role,
+    setLoading(true);
+    setError("");
+
+    const url = editingId
+      ? `https://payroll.politekniklp3i-tasikmalaya.ac.id/api/master-user/${editingId}`
+      : "https://payroll.politekniklp3i-tasikmalaya.ac.id/api/master-user";
+    
+    const method = editingId ? "PATCH" : "POST";
+
+    const body: any = {
+      name,
+      email,
+      role,
     };
 
-    setDataUser([newData, ...dataUser]);
-    setFormData({ nama: "", email: "", password: "", role: "" });
-    setShowForm(false);
-    setCurrentPage(1);
+    if (password || !editingId) {
+      body.password = password;
+    }
+
+    try {
+      const res = await fetch(url, {
+        method: method,
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || `Gagal ${editingId ? 'mengupdate' : 'menambahkan'} user`);
+      }
+
+      resetForm();
+      fetchUser();
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetForm = () => {
+    setName("");
+    setEmail("");
+    setPassword("");
+    setRole("user");
+    setEditingId(null);
   };
 
   return (
@@ -102,7 +155,7 @@ export default function UserPage() {
               <h2 className="text-md font-bold text-slate-800">Tambah User Baru</h2>
             </div>
             
-            <form onSubmit={handleTambahData} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="group">
                 <label className="text-[11px] font-bold text-slate-500 ml-1 mb-1.5 block group-hover:text-teal-600 transition-colors uppercase tracking-wider">
                   Nama Lengkap
@@ -111,8 +164,8 @@ export default function UserPage() {
                   name="nama"
                   type="text"
                   placeholder="Masukkan nama user"
-                  value={formData.nama}
-                  onChange={handleInputChange}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium bg-slate-50/50 focus:bg-white text-slate-700"
                   required
                 />
@@ -126,8 +179,8 @@ export default function UserPage() {
                   name="email"
                   type="email"
                   placeholder="user@fcb.com"
-                  value={formData.email}
-                  onChange={handleInputChange}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium bg-slate-50/50 focus:bg-white text-slate-700"
                   required
                 />
@@ -141,8 +194,8 @@ export default function UserPage() {
                   name="password"
                   type="password"
                   placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleInputChange}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium bg-slate-50/50 focus:bg-white text-slate-700"
                   required
                 />
@@ -154,8 +207,8 @@ export default function UserPage() {
                 </label>
                 <select
                   name="role"
-                  value={formData.role}
-                  onChange={handleInputChange}
+                  value={role}
+                  onChange={(e) => setRole(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 transition-all text-sm font-medium bg-slate-50/50 focus:bg-white text-slate-600"
                   required
                 >
@@ -217,7 +270,7 @@ export default function UserPage() {
                     <tr key={user.id} className="hover:bg-slate-50/80 transition-colors group">
                       <td className="px-6 py-4 text-center text-slate-400 font-medium">{indexOfFirstItem + index + 1}</td>
                       <td className="px-6 py-4">
-                        <span className="font-bold text-slate-800 group-hover:text-teal-600 transition-colors">{user.nama}</span>
+                        <span className="font-bold text-slate-800 group-hover:text-teal-600 transition-colors">{user.name}</span>
                       </td>
                       <td className="px-6 py-4 text-slate-500 text-xs">{user.email}</td>
                       <td className="px-6 py-4">
