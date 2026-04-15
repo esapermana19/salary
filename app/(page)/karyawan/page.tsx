@@ -7,15 +7,12 @@ import {
   Edit,
   Save,
   X,
-  UserPlus,
   Search,
   ChevronLeft,
   ChevronRight,
-  Mail,
-  CreditCard,
-  MapPin,
-  Briefcase,
-  Calendar,
+  Loader2,
+  Info,
+  Users,
 } from "lucide-react";
 
 interface Jabatan {
@@ -40,33 +37,37 @@ export default function KaryawanPage() {
   const [karyawanList, setKaryawanList] = useState<Karyawan[]>([]);
   const [jabatanList, setJabatanList] = useState<Jabatan[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [selectedKaryawan, setSelectedKaryawan] = useState<Karyawan | null>(
     null,
   );
-  const [editingId, setEditingId] = useState<number | null>(null);
-  const [showForm, setShowForm] = useState(false);
+
+  // Search & Pagination states
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  const [formData, setFormData] = useState({
-    nik: "",
-    nama: "",
-    email: "",
-    tempatLahir: "",
-    tanggalLahir: "",
-    alamat: "",
-    jabatan: "",
-    status: "Tetap",
-  });
+  // Form states
+  const [nik, setNik] = useState("");
+  const [nama, setNama] = useState("");
+  const [email, setEmail] = useState("");
+  const [tempatLahir, setTempatLahir] = useState("");
+  const [tanggalLahir, setTanggalLahir] = useState("");
+  const [alamat, setAlamat] = useState("");
+  const [idJabatan, setIdJabatan] = useState<string>("");
+  const [statusAktif, setStatusAktif] = useState(true);
 
-  // Tambahkan di bawah state dataKaryawan
-  const [error, setError] = useState<string | null>(null);
-  const selectRef = useRef<HTMLDivElement>(null);
+  // Searchable Select states
+  const [searchJabatan, setSearchJabatan] = useState("");
   const [isSelectOpen, setIsSelectOpen] = useState(false);
+  const selectRef = useRef<HTMLDivElement>(null);
+
   const token =
     typeof window !== "undefined" ? localStorage.getItem("access_token") : null;
 
+  // Close select on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -79,9 +80,7 @@ export default function KaryawanPage() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
-  // ===============================
-  // GET DATA JABATAN DARI API
-  // ===============================
+
   const fetchJabatan = async () => {
     try {
       const res = await fetch(
@@ -94,11 +93,9 @@ export default function KaryawanPage() {
         },
       );
       const data = await res.json();
-      if (res.ok) {
-        setJabatanList(data.data || data);
-      }
-    } catch (err: unknown) {
-      console.error("Fetch Jabatan Error:", err);
+      if (res.ok) setJabatanList(data.data || data);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -115,13 +112,10 @@ export default function KaryawanPage() {
         },
       );
       const data = await res.json();
-      if (!res.ok)
-        throw new Error(data.message || "Gagal mengambil data karyawan");
+      if (!res.ok) throw new Error(data.message || "Gagal mengambil data");
       setKaryawanList(data.data || data);
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -133,29 +127,6 @@ export default function KaryawanPage() {
       fetchKaryawan();
     }
   }, [token]);
-
-  // Logic Filtering
-  const filteredKaryawan = karyawanList.filter(
-    (item) =>
-      item.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.jabatan?.jabatan.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-  const { name, value } = e.target;
-  setFormData((prev) => ({
-    ...prev,
-    [name]: value,
-  }));
-};
-  // Logic Pagination
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredKaryawan.slice(
-    indexOfFirstItem,
-    indexOfLastItem,
-  );
-  const totalPages = Math.ceil(filteredKaryawan.length / itemsPerPage);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -170,74 +141,125 @@ export default function KaryawanPage() {
 
     try {
       const res = await fetch(url, {
-        method: method,
+        method,
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
           Accept: "application/json",
         },
         body: JSON.stringify({
-          nik: formData.nik,
-          nama: formData.nama,
-          email: formData.email,
-          tempat_lahir: formData.tempatLahir,
-          tanggal_lahir: formData.tanggalLahir,
-          alamat: formData.alamat,
-          id_jabatan: parseInt(formData.jabatan), // Pastikan ini ID, bukan nama
-          status_aktif: formData.status === "Aktif",
+          nik,
+          nama,
+          email,
+          tempat_lahir: tempatLahir,
+          tanggal_lahir: tanggalLahir,
+          alamat,
+          id_jabatan: parseInt(idJabatan),
+          status_aktif: statusAktif,
         }),
       });
 
       const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Gagal menyimpan");
 
-      if (!res.ok) {
-        throw new Error(
-          data.message ||
-            `Gagal ${editingId ? "mengupdate" : "menambahkan"} karyawan`,
-        );
-      }
-
+      alert(editingId ? "Karyawan diperbarui!" : "Karyawan ditambahkan!");
       resetForm();
+      setShowForm(false);
       fetchKaryawan();
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
+    } catch (err: any) {
+      setError(err.message);
+      alert(err.message);
     } finally {
       setLoading(false);
     }
   };
 
   const resetForm = () => {
-  setFormData({
-    nik: "",
-    nama: "",
-    email: "",
-    tempatLahir: "",
-    tanggalLahir: "",
-    alamat: "",
-    jabatan: "",
-    status: "Aktif",
-  });
-  setEditingId(null);
-};
+    setNik("");
+    setNama("");
+    setEmail("");
+    setTempatLahir("");
+    setTanggalLahir("");
+    setAlamat("");
+    setIdJabatan("");
+    setStatusAktif(true);
+    setEditingId(null);
+  };
+
+  const handleEdit = (item: Karyawan) => {
+    setEditingId(item.id);
+    setNik(item.nik);
+    setNama(item.nama);
+    setEmail(item.email);
+    setTempatLahir(item.tempat_lahir || "");
+    setTanggalLahir(item.tanggal_lahir || "");
+    setAlamat(item.alamat || "");
+    setIdJabatan(item.id_jabatan.toString());
+    setStatusAktif(item.status_aktif);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm("Hapus data ini?")) return;
+    try {
+      const res = await fetch(
+        `https://payroll.politekniklp3i-tasikmalaya.ac.id/api/karyawan/${id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            Accept: "application/json",
+          },
+        },
+      );
+      if (!res.ok) throw new Error("Gagal menghapus");
+      fetchKaryawan();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  // Logic Filtering & Pagination
+  const filteredKaryawan = karyawanList.filter(
+    (k) =>
+      k.nama.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      k.nik.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const totalPages = Math.ceil(filteredKaryawan.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredKaryawan.slice(
+    indexOfFirstItem,
+    indexOfLastItem,
+  );
+
+  const selectedJabatanLabel =
+    jabatanList.find((j) => j.id.toString() === idJabatan)?.jabatan ||
+    "Pilih Jabatan";
 
   return (
     <div className="space-y-6 p-2 text-slate-800">
-      {/* Header Halaman */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div>
-          <h1 className="text-xl font-bold tracking-tight">Data Karyawan</h1>
-          <p className="text-slate-500 font-medium text-xs mt-1 text-slate-400">
-            Kelola informasi detail dan status kerja karyawan
+          <h1 className="text-xl font-bold tracking-tight">
+            Manajemen Karyawan
+          </h1>
+          <p className="text-slate-500 font-medium text-xs mt-1">
+            Kelola data informasi dan jabatan karyawan
           </p>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
-          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all duration-200 text-sm ${
+          onClick={() => {
+            if (showForm) resetForm();
+            setShowForm(!showForm);
+          }}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-lg font-bold transition-all text-sm ${
             showForm
-              ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-              : "bg-teal-500 text-white hover:bg-teal-600 shadow-md shadow-teal-500/20 active:scale-95"
+              ? "bg-slate-100 text-slate-600"
+              : "bg-teal-500 text-white shadow-md shadow-teal-500/20 active:scale-95"
           }`}
         >
           {showForm ? (
@@ -252,183 +274,181 @@ export default function KaryawanPage() {
         </button>
       </div>
 
-      {/* FORM TAMBAH DATA (STRUKTUR SESUAI GAMBAR) */}
+      {/* Form Section */}
       {showForm && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-300">
-          <div className="flex items-center gap-2 mb-6 text-slate-800 border-b pb-4">
-            <div className="p-2 bg-teal-500 rounded-lg text-white">
-              <Plus size={20} />
-            </div>
-            <h2 className="text-md font-bold">Tambah Karyawan</h2>
+          <div className="flex items-center gap-2 mb-6 border-b pb-4">
+            <Users size={20} className="text-teal-500" />
+            <h2 className="text-md font-bold">
+              {editingId ? "Edit Data Karyawan" : "Pendaftaran Karyawan Baru"}
+            </h2>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Baris 1: NIK & Nama */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                  NIK
-                </label>
-                <input
-                  name="nik"
-                  value={formData.nik}
-                  onChange={handleInputChange}
-                  type="text"
-                  placeholder="NIK"
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-semibold"
-                  required
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                  Nama
-                </label>
-                <input
-                  name="nama"
-                  value={formData.nama}
-                  onChange={handleInputChange}
-                  type="text"
-                  placeholder="Nama Lengkap"
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all font-semibold"
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Baris 2: Email */}
+          <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 md:grid-cols-2 gap-5"
+          >
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                Email
+              <label className="text-[11px] font-bold text-slate-500 uppercase ml-1">
+                NIK
               </label>
               <input
-                name="email"
-                value={formData.email}
-                onChange={handleInputChange}
-                type="email"
-                placeholder="email@company.com"
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all"
+                type="text"
+                value={nik}
+                onChange={(e) => setNik(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-teal-500 text-sm bg-slate-50/50"
                 required
               />
             </div>
-
-            {/* Baris 3: Tempat Lahir & Tanggal Lahir */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                  Tempat Lahir
-                </label>
-                <input
-                  name="tempatLahir"
-                  value={formData.tempatLahir}
-                  onChange={handleInputChange}
-                  type="text"
-                  placeholder="Kota"
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                  Tanggal Lahir
-                </label>
-                <input
-                  name="tanggalLahir"
-                  value={formData.tanggalLahir}
-                  onChange={handleInputChange}
-                  type="date"
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-slate-600"
-                />
-              </div>
-            </div>
-
-            {/* Baris 4: Alamat */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                Alamat
+              <label className="text-[11px] font-bold text-slate-500 uppercase ml-1">
+                Nama Lengkap
               </label>
-              <textarea
-                name="alamat"
-                value={formData.alamat}
-                onChange={handleInputChange}
-                rows={3}
-                placeholder="Alamat Lengkap"
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all resize-none"
-              ></textarea>
+              <input
+                type="text"
+                value={nama}
+                onChange={(e) => setNama(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-teal-500 text-sm bg-slate-50/50"
+                required
+              />
             </div>
-
-            {/* Baris 5: Jabatan */}
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
+              <label className="text-[11px] font-bold text-slate-500 uppercase ml-1">
+                Email
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-teal-500 text-sm bg-slate-50/50"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest ml-1">
                 Jabatan
               </label>
-              <select
-                name="jabatan"
-                value={formData.jabatan}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all cursor-pointer appearance-none"
-                required
-              >
-                <option value="">Pilih Jabatan</option>
-                {jabatanList.map((jbtn: any) => (
-                  <option key={jbtn.id} value={jbtn.nama_jabatan || jbtn.nama}>
-                    {jbtn.nama_jabatan || jbtn.nama}
-                  </option>
-                ))}
-              </select>
-            </div>
+              <div className="relative">
+                <select
+                  value={idJabatan}
+                  onChange={(e) => setIdJabatan(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-teal-500/10 focus:border-teal-500 transition-all text-sm bg-slate-50 focus:bg-white appearance-none font-medium text-slate-700"
+                  required
+                >
+                  <option value="">Pilih Jabatan</option>
+                  {jabatanList.map((j) => (
+                    <option key={j.id} value={j.id}>
+                      {j.jabatan}
+                    </option>
+                  ))}
+                </select>
 
-            {/* Baris 6: Status Aktif */}
+                {/* Icon Panah Modern */}
+                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </div>
+              </div>
+            </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
-                Status Aktif
+              <label className="text-[11px] font-bold text-slate-500 uppercase ml-1">
+                Tempat Lahir
+              </label>
+              <input
+                type="text"
+                value={tempatLahir}
+                onChange={(e) => setTempatLahir(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-teal-500 text-sm bg-slate-50/50"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-500 uppercase ml-1">
+                Tanggal Lahir
+              </label>
+              <input
+                type="date"
+                value={tanggalLahir}
+                onChange={(e) => setTanggalLahir(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-teal-500 text-sm bg-slate-50/50"
+              />
+            </div>
+            <div className="md:col-span-2 space-y-1">
+              <label className="text-[11px] font-bold text-slate-500 uppercase ml-1">
+                Alamat Lengkap
+              </label>
+              <textarea
+                value={alamat}
+                onChange={(e) => setAlamat(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-teal-500 text-sm bg-slate-50/50 min-h-[80px]"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-[11px] font-bold text-slate-500 uppercase ml-1">
+                Status Karyawan
               </label>
               <select
-                name="status"
-                value={formData.status}
-                onChange={handleInputChange}
-                className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 transition-all cursor-pointer font-bold text-teal-600"
+                value={statusAktif ? "true" : "false"}
+                onChange={(e) => setStatusAktif(e.target.value === "true")}
+                className="w-full rounded-lg border border-slate-300 px-4 py-2.5 outline-none focus:border-teal-500 text-sm bg-slate-50/50"
               >
-                <option value="Aktif">Aktif</option>
-                <option value="Non-Aktif">Non-Aktif</option>
+                <option value="true">Aktif</option>
+                <option value="false">Tidak Aktif</option>
               </select>
             </div>
-
-            {/* Tombol Simpan */}
-            <div className="pt-4">
+            <div className="md:col-span-2 flex justify-end gap-2 pt-2">
               <button
                 type="submit"
-                className="w-full bg-teal-500 text-white py-3 rounded-xl font-bold hover:bg-teal-600 active:scale-[0.98] transition-all shadow-md shadow-teal-500/20 text-sm"
+                disabled={loading}
+                className="w-full md:w-auto bg-slate-800 text-white px-8 py-2.5 rounded-lg font-bold hover:bg-teal-600 transition-all flex items-center justify-center gap-2 text-sm shadow-sm"
               >
-                Simpan
+                {loading ? (
+                  <Loader2 className="animate-spin" size={18} />
+                ) : (
+                  <Save size={18} />
+                )}
+                {editingId ? "Perbarui Data" : "Simpan Karyawan"}
               </button>
             </div>
           </form>
         </div>
       )}
 
-      {/* VIEW DATA DENGAN PAGINATION */}
+      {/* Table Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
         <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="flex items-center gap-2 w-full md:w-auto">
             <div className="w-1 h-4 bg-teal-500 rounded-full"></div>
-            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">
-              Database Karyawan Aktif
+            <span className="text-xs font-bold text-slate-600 uppercase tracking-widest">
+              Daftar Karyawan
+            </span>
+            <span className="ml-2 text-[10px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded font-bold uppercase">
+              {filteredKaryawan.length} Total
             </span>
           </div>
-
-          <div className="relative w-full md:w-72 group">
+          <div className="relative w-full md:w-72">
             <Search
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-500"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
               size={16}
             />
             <input
               type="text"
-              placeholder="Cari nama atau jabatan..."
+              placeholder="Cari NIK atau Nama..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-lg outline-none focus:ring-2 focus:ring-teal-500/10 focus:border-teal-500 text-xs font-medium transition-all"
+              className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg outline-none focus:border-teal-500 text-xs shadow-sm"
             />
           </div>
         </div>
@@ -438,7 +458,7 @@ export default function KaryawanPage() {
             <thead>
               <tr className="text-slate-400 text-[10px] uppercase tracking-wider font-bold bg-slate-50/30">
                 <th className="px-6 py-4 w-16 text-center">No</th>
-                <th className="px-6 py-4">Nama Lengkap</th>
+                <th className="px-6 py-4">Nama Karyawan</th>
                 <th className="px-6 py-4">Jabatan</th>
                 <th className="px-6 py-4 text-center">Status</th>
                 <th className="px-6 py-4 text-right">Aksi</th>
@@ -451,35 +471,43 @@ export default function KaryawanPage() {
                     key={item.id}
                     className="hover:bg-slate-50/80 transition-colors group"
                   >
-                    <td className="px-6 py-4 text-center text-slate-400 font-bold">
+                    <td className="px-6 py-4 text-center text-slate-400 font-medium">
                       {indexOfFirstItem + index + 1}
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-bold text-slate-800 group-hover:text-teal-600 transition-colors">
-                        {item.nama}
-                      </p>
-                      <p className="text-[9px] text-slate-400 uppercase tracking-tighter">
-                        ID: EMP-{item.id}
-                      </p>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-800 group-hover:text-teal-600 transition-colors">
+                          {item.nama}
+                        </span>
+                        <span className="text-[10px] text-slate-400 tracking-tighter">
+                          {item.nik}
+                        </span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-md text-[10px] font-bold uppercase tracking-tight">
-                        {item.jabatan?.jabatan || jabatanList.find(j => j.id === item.id_jabatan)?.jabatan || "N/A"}
+                    <td className="px-6 py-4 text-xs">
+                      <span className="bg-slate-100 px-2 py-1 rounded text-slate-600 font-bold border border-slate-200">
+                        {item.jabatan?.jabatan || "N/A"}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-center">
-                      {item.status_aktif ? (
-                          <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-600 text-[10px] font-black uppercase tracking-widest border border-emerald-200">Aktif</span>
-                        ) : (
-                          <span className="px-3 py-1 rounded-full bg-rose-100 text-rose-600 text-[10px] font-black uppercase tracking-widest border border-rose-200">Off</span>
-                        )}
+                      <span
+                        className={`px-3 py-1 rounded-md text-[10px] font-black uppercase border ${item.status_aktif ? "bg-emerald-50 text-emerald-600 border-emerald-100" : "bg-rose-50 text-rose-600 border-rose-100"}`}
+                      >
+                        {item.status_aktif ? "Aktif" : "Off"}
+                      </span>
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-1">
-                        <button className="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg transition-all">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="p-2 text-slate-400 hover:text-teal-600 hover:bg-teal-50 rounded-md transition-all"
+                        >
                           <Edit size={16} />
                         </button>
-                        <button className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all">
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-md transition-all"
+                        >
                           <Trash2 size={16} />
                         </button>
                       </div>
@@ -488,13 +516,11 @@ export default function KaryawanPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center">
-                    <div className="flex flex-col items-center opacity-30">
-                      <Search size={32} className="mb-2" />
-                      <p className="text-xs font-bold uppercase tracking-widest">
-                        Karyawan tidak ditemukan
-                      </p>
-                    </div>
+                  <td
+                    colSpan={5}
+                    className="px-6 py-12 text-center text-slate-400 text-xs font-bold uppercase tracking-widest opacity-40"
+                  >
+                    Data tidak ditemukan
                   </td>
                 </tr>
               )}
@@ -502,7 +528,7 @@ export default function KaryawanPage() {
           </table>
         </div>
 
-        {/* PAGINATION CONTROLS */}
+        {/* Pagination Style Sesuai Permintaan */}
         <div className="p-4 border-t border-slate-100 bg-white flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">
             Showing{" "}
@@ -511,9 +537,8 @@ export default function KaryawanPage() {
               {Math.min(indexOfLastItem, filteredKaryawan.length)}
             </span>{" "}
             of <span className="text-slate-700">{filteredKaryawan.length}</span>{" "}
-            Employees
+            Karyawan
           </p>
-
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -522,26 +547,26 @@ export default function KaryawanPage() {
             >
               <ChevronLeft size={18} />
             </button>
-
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${
-                  currentPage === i + 1
-                    ? "bg-teal-500 text-white shadow-md shadow-teal-500/20 border-teal-500"
-                    : "text-slate-500 hover:bg-slate-100 border border-transparent"
-                }`}
-              >
-                {i + 1}
-              </button>
-            ))}
-
+            <div className="flex items-center gap-1">
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`w-9 h-9 rounded-lg text-xs font-bold transition-all ${
+                    currentPage === i + 1
+                      ? "bg-teal-500 text-white shadow-md shadow-teal-500/20 border-teal-500"
+                      : "text-slate-500 hover:bg-slate-100 border border-transparent"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
             <button
               onClick={() =>
                 setCurrentPage((prev) => Math.min(prev + 1, totalPages))
               }
-              disabled={currentPage === totalPages}
+              disabled={currentPage === totalPages || totalPages === 0}
               className="p-2 rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 disabled:opacity-30 transition-all"
             >
               <ChevronRight size={18} />
@@ -549,6 +574,71 @@ export default function KaryawanPage() {
           </div>
         </div>
       </div>
+
+      {/* Detail Modal */}
+      {selectedKaryawan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="w-full max-w-lg overflow-hidden rounded-3xl bg-white shadow-2xl">
+            <div className="bg-slate-800 p-8 text-white relative">
+              <h3 className="text-2xl font-bold tracking-tight">
+                {selectedKaryawan.nama}
+              </h3>
+              <p className="text-slate-400 text-sm mt-1 uppercase font-bold tracking-widest">
+                {selectedKaryawan.jabatan?.jabatan || "No Position"}
+              </p>
+              <button
+                onClick={() => setSelectedKaryawan(null)}
+                className="absolute right-6 top-6 h-8 w-8 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-all"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-8 space-y-4">
+              <div className="grid grid-cols-2 border-b pb-4">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  NIK
+                </span>
+                <span className="text-sm font-bold text-slate-700">
+                  {selectedKaryawan.nik}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 border-b pb-4">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  Email
+                </span>
+                <span className="text-sm font-bold text-slate-700">
+                  {selectedKaryawan.email}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 border-b pb-4">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  TTL
+                </span>
+                <span className="text-sm font-bold text-slate-700">
+                  {selectedKaryawan.tempat_lahir},{" "}
+                  {selectedKaryawan.tanggal_lahir}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase">
+                  Alamat
+                </span>
+                <p className="text-xs text-slate-600 bg-slate-50 p-3 rounded-xl italic leading-relaxed">
+                  {selectedKaryawan.alamat || "Alamat tidak tersedia"}
+                </p>
+              </div>
+            </div>
+            <div className="p-4 bg-slate-50 flex justify-end">
+              <button
+                onClick={() => setSelectedKaryawan(null)}
+                className="px-6 py-2 bg-white border rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
